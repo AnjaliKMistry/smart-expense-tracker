@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body>
+
+{% if session.get('user') %}
+<nav class="navbar">
+  <div class="nav-brand">💰 Smart Expense Tracker</div>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="{{ url_for('dashboard') }}" class="nav-link">📊 Dashboard</a>
+    <a href="{{ url_for('predict') }}" class="nav-link">🤖 Predict</a>
+    <a href="{{ url_for('chart') }}" class="nav-link">📈 Charts</a>
+    <a href="{{ url_for('insights') }}" class="nav-link">💡 Insights</a>
+    <a href="{{ url_for('forecast') }}" class="nav-link">📅 Forecast</a>
+    <a href="{{ url_for('add_expense') }}" class="nav-link btn-add">➕ Add Expense</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user">👤 {{ session['user'] }}</span>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-page">
+  <div class="form-card glass">
+    <h2>🤖 AI Expense Prediction</h2>
+    <p class="page-subtitle">Predicting for: <strong>{{ user }}</strong></p>
+
+    <form method="POST" action="{{ url_for('predict') }}">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" class="form-control" required>
+            {% for v in dropdowns.category %}
+              <option value="{{ v }}" {% if request.form.get('category') == v %}selected{% endif %}>
+                {{ v }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Merchant Type</label>
+          <select name="merchanttype" class="form-control" required>
+            {% for v in dropdowns.merchanttype %}
+              <option value="{{ v }}" {% if request.form.get('merchanttype') == v %}selected{% endif %}>
+                {{ v }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Location</label>
+          <select name="location" class="form-control" required>
+            {% for v in dropdowns.location %}
+              <option value="{{ v }}" {% if request.form.get('location') == v %}selected{% endif %}>
+                {{ v }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Time of Day</label>
+          <select name="timeofday" class="form-control" required>
+            {% for v in dropdowns.timeofday %}
+              <option value="{{ v }}" {% if request.form.get('timeofday') == v %}selected{% endif %}>
+                {{ v }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select name="paymentmethod" class="form-control" required>
+            {% for v in dropdowns.paymentmethod %}
+              <option value="{{ v }}" {% if request.form.get('paymentmethod') == v %}selected{% endif %}>
+                {{ v }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Predict Expense</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back</a>
+      </div>
+
+    </form>
+
+    {% if result %}
+    <div class="result-box {% if result.alert %}result-danger{% else %}result-success{% endif %}">
+
+      <div class="result-icon">
+        {% if result.alert %}⚠️{% else %}✅{% endif %}
+      </div>
+
+      <div class="result-amount">
+        ₹{{ "%.2f"|format(result.amount) }}
+      </div>
+
+      <div class="result-summary">
+        Predicted Expense: <strong>₹{{ "%.2f"|format(result.amount) }}</strong>
+      </div>
+
+      <div class="result-explanation" style="margin-top:1rem; padding:1rem; background:rgba(108,99,255,0.08); border-radius:8px; text-align:left;">
+        <strong>Why this amount?</strong>
+        <p style="margin-top:0.5rem; color:var(--text2);">{{ result.explanation }}</p>
+      </div>
+
+      <div class="result-metrics" style="margin-top:1rem; font-size:0.85rem; color:var(--text2);">
+        Model accuracy (test set): MAE ₹{{ result.mae }} | RMSE ₹{{ result.rmse }} | R² {{ result.r2 }}
+      </div>
+
+      <div class="result-suggestion">
+        {% if result.alert %}
+          High spending detected! Try to reduce unnecessary expenses.
+        {% else %}
+          Spending looks balanced for these inputs.
+        {% endif %}
+      </div>
+
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

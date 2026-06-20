@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card glass">
+    <div class="auth-logo">📝</div>
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Join Smart Expense Tracker</p>
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" class="form-control" placeholder="Choose a username" required/><br>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Choose a password" required/><br>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Register</button>
+    </form>
+    <p class="auth-footer">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>Welcome back, <span class="highlight">{{ user }}</span> 👋</h1>
+  <p class="page-subtitle">Here's your financial overview</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="cards-grid">
+  <div class="card glass">
+    <div class="card-icon">💸</div>
+    <div class="card-label">Total Spent</div>
+    <div class="card-value">₹{{ "%.2f"|format(total) }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">📊</div>
+    <div class="card-label">Avg per Transaction</div>
+    <div class="card-value">₹{{ "%.2f"|format(avg) }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">🔝</div>
+    <div class="card-label">Highest Expense</div>
+    <div class="card-value">₹{{ "%.2f"|format(highest) }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">🏷️</div>
+    <div class="card-label">Top Category</div>
+    <div class="card-value cat-value">{{ top_cat }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">🧾</div>
+    <div class="card-label">Transactions</div>
+    <div class="card-value">{{ expenses|length }}</div>
+  </div>
+</div>
+
+<!-- Budget Card -->
+<div class="glass budget-card">
+  <div class="budget-header">
+    <div>
+      <div class="card-label">Monthly Budget</div>
+      <div class="budget-amounts">
+        <span class="budget-set">Budget: ₹{{ "%.2f"|format(budget) }}</span>
+        <span class="budget-spent">Spent: ₹{{ "%.2f"|format(total_spent) }}</span>
+        <span class="budget-remaining {% if remaining < 0 %}over-budget{% endif %}">
+          Remaining: ₹{{ "%.2f"|format(remaining) }}
+        </span>
+      </div>
+      {% if remaining < 0 %}
+      <div class="alert alert-error budget-alert">⚠️ Budget exceeded! You are ₹{{ "%.2f"|format(remaining|abs) }} over budget.</div>
+      {% endif %}
+    </div>
+    <form method="POST" action="{{ url_for('set_budget') }}" class="budget-form">
+      <input type="number" name="budget" class="form-control" placeholder="Set budget (₹)"
+             value="{{ budget if budget else '' }}" min="0" step="0.01" required />
+      <button type="submit" class="btn btn-primary">Set Budget</button>
+    </form>
+  </div>
+  <div class="progress-bar">
+    <div class="progress" style="width: {{ [[(total_spent / budget * 100) if budget else 0, 0]|max, 100]|min }}%; background: {{ 'var(--danger)' if remaining < 0 else 'var(--success)' }};"></div>
+  </div>
+</div>
+
+<!-- Category Chart -->
+{% if cat_labels %}
+<div class="chart-section glass">
+  <h3>Category-wise Spending</h3>
+  <canvas id="dashChart" height="100"></canvas>
+</div>
+{% endif %}
+
+<!-- Expense Table -->
+<div class="table-section glass">
+  <div class="table-header">
+    <h3>Recent Expenses</h3>
+    <a href="{{ url_for('add_expense') }}" class="btn btn-primary">➕ Add Expense</a>
+  </div>
+  {% if expenses %}
+  <div class="table-responsive">
+    <table class="expense-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Payment</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in expenses %}
+        <tr>
+          <td>{{ e.date }}</td>
+          <td>{{ e.description or '—' }}</td>
+          <td class="amount-cell">₹{{ "%.2f"|format(e.amount|float) }}</td>
+          <td><span class="badge">{{ e.category or '—' }}</span></td>
+          <td>{{ e.paymentmethod or '—' }}</td>
+          <td class="action-cell">
+            <a href="{{ url_for('edit_expense', expense_id=e.id) }}" class="btn btn-edit">✏️ Edit</a>
+            <form method="POST" action="{{ url_for('delete_expense', expense_id=e.id) }}" style="display:inline"
+                  onsubmit="return confirm('Delete this expense?')">
+              <button type="submit" class="btn btn-delete">🗑️ Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No expenses yet. <a href="{{ url_for('add_expense') }}">Add your first one!</a></p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const labels = {{ cat_labels | tojson }};
+  const values = {{ cat_values | tojson }}.map(Number);
+  if (labels.length > 0) {
+    const ctx = document.getElementById('dashChart');
+    if (ctx) {
+      new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Amount (₹)',
+            data: values,
+            backgroundColor: generateColors(labels.length),
+            borderRadius: 8,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  }
+});
+</script>
+{% endblock %}

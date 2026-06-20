@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>💡 Spending Insights</h1>
+  <p class="page-subtitle">Smart analysis of your financial habits</p>
+</div>
+
+<div class="cards-grid">
+  <div class="card glass">
+    <div class="card-icon">🏷️</div>
+    <div class="card-label">Top Category</div>
+    <div class="card-value cat-value">{{ top_cat }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">📍</div>
+    <div class="card-label">Top Location</div>
+    <div class="card-value cat-value">{{ top_loc }}</div>
+  </div>
+  {% if highest %}
+  <div class="card glass">
+    <div class="card-icon">💸</div>
+    <div class="card-label">Highest Expense</div>
+    <div class="card-value">₹{{ "%.2f"|format(highest.amount|float) }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Category Breakdown -->
+<div class="table-section glass">
+  <h3>Category Breakdown</h3>
+  <div class="table-responsive">
+    <table class="expense-table">
+      <thead>
+        <tr><th>Category</th><th>Total Spent</th></tr>
+      </thead>
+      <tbody>
+        {% for cat, total in cat_totals.items() | sort(attribute='1', reverse=True) %}
+        <tr>
+          <td><span class="badge">{{ cat }}</span></td>
+          <td class="amount-cell">₹{{ "%.2f"|format(total) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ML Model Visualizations -->
+{% if charts %}
+<div class="chart-section glass">
+  <h3>ML Model Analysis</h3>
+  <p style="color:var(--text2); margin-bottom:1rem;">Charts from the trained XGBoost model (test set evaluation).</p>
+  <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+    {% for chart in charts %}
+    <div class="card glass" style="padding:0.5rem;">
+      <img src="{{ url_for('static', filename='charts/' + chart) }}"
+           alt="{{ chart.replace('.png','').replace('_',' ') }}"
+           style="width:100%; border-radius:8px;">
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Smart Suggestions -->
+<div class="suggestions-section glass">
+  <h3>🧠 Smart Suggestions</h3>
+  <ul class="suggestions-list">
+    {% for s in suggestions %}
+    <li class="suggestion-item">💬 {{ s }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="form-actions" style="margin-top:1.5rem">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+{% endblock %}

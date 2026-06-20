@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>Budget Forecast</h1>
+  <p class="page-subtitle">Next month's spending prediction for <strong>{{ user }}</strong></p>
+</div>
+
+<div class="cards-grid">
+  <div class="card glass">
+    <div class="card-icon">📅</div>
+    <div class="card-label">Forecasted Next Month</div>
+    <div class="card-value">₹{{ "%.2f"|format(forecast.forecast) }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">🎯</div>
+    <div class="card-label">Your Budget</div>
+    <div class="card-value">₹{{ "%.2f"|format(forecast.budget) }}</div>
+  </div>
+  <div class="card glass">
+    <div class="card-icon">
+      {% if forecast.status == 'under' %}✅
+      {% elif forecast.status == 'on_track' %}👍
+      {% elif forecast.status == 'over' %}⚠️
+      {% else %}ℹ️{% endif %}
+    </div>
+    <div class="card-label">Status</div>
+    <div class="card-value cat-value">{{ forecast.status_label }}</div>
+  </div>
+</div>
+
+<!-- Budget comparison bar -->
+<div class="glass budget-card">
+  <h3>Budget vs Forecast</h3>
+  {% if forecast.budget > 0 %}
+  <div class="budget-amounts" style="margin:1rem 0;">
+    <span class="budget-set">Budget: ₹{{ "%.2f"|format(forecast.budget) }}</span>
+    <span class="budget-spent">Forecast: ₹{{ "%.2f"|format(forecast.forecast) }}</span>
+  </div>
+  <div class="progress-bar">
+    {% set pct = (forecast.forecast / forecast.budget * 100) if forecast.budget else 0 %}
+    <div class="progress" style="width: {{ [pct, 100]|min }}%; background: {{ 'var(--danger)' if forecast.status == 'over' else ('var(--success)' if forecast.status == 'under' else 'var(--primary)') }};"></div>
+  </div>
+  {% else %}
+  <p style="margin:1rem 0; color:var(--text2);">
+    Set a monthly budget on the <a href="{{ url_for('dashboard') }}">Dashboard</a> to see how your forecast compares.
+  </p>
+  {% endif %}
+</div>
+
+<!-- Monthly trend chart -->
+{% if forecast.monthly_labels %}
+<div class="chart-section glass">
+  <h3>Your Monthly Spending Trend</h3>
+  <canvas id="forecastChart" height="100"></canvas>
+</div>
+{% endif %}
+
+<!-- Category drivers -->
+<div class="table-section glass">
+  <h3>Categories Driving Your Forecast</h3>
+  <p style="color:var(--text2); margin-bottom:1rem;">
+    Based on {{ forecast.method }}.
+  </p>
+  {% if forecast.drivers %}
+  <div class="table-responsive">
+    <table class="expense-table">
+      <thead>
+        <tr><th>Category</th><th>Share of Spending</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        {% for d in forecast.drivers %}
+        <tr>
+          <td><span class="badge">{{ d.name }}</span></td>
+          <td>{{ d.share }}%</td>
+          <td class="amount-cell">₹{{ "%.2f"|format(d.total) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>No expense data yet. <a href="{{ url_for('add_expense') }}">Add expenses</a> to generate a forecast.</p>
+  {% endif %}
+</div>
+
+<div class="form-actions" style="margin-top:1.5rem">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+{% if forecast.monthly_labels %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const labels = {{ forecast.monthly_labels | tojson }};
+  const values = {{ forecast.monthly_values | tojson }};
+  const ctx = document.getElementById('forecastChart');
+  if (ctx && labels.length > 0) {
+    new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Monthly Spend (₹)',
+          data: values,
+          borderColor: '#6c63ff',
+          backgroundColor: 'rgba(108,99,255,0.15)',
+          fill: true,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

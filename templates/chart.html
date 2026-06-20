@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>📈 Expense Charts</h1>
+  <p class="page-subtitle">Visual breakdown of your spending</p>
+</div>
+
+<div class="charts-stack">
+  <!-- Bar Chart -->
+  <div class="chart-card glass">
+    <h3>Category-wise Spending</h3>
+    <canvas id="barChart"></canvas>
+  </div>
+
+  <!-- Line Chart -->
+  <div class="chart-card glass">
+    <h3>Monthly Expenses</h3>
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <!-- Pie Chart -->
+  <div class="chart-card glass pie-card">
+    <h3>Category Distribution</h3>
+    <div class="pie-wrapper">
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="form-actions" style="margin-top:1.5rem">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () 
+{
+  const catLabels  = {{ cat_labels   | tojson }};
+  const catValues  = {{ cat_values   | tojson }}.map(Number);
+  const monthLabels = {{ month_labels | tojson }};
+  const monthValues = {{ month_values | tojson }}.map(Number);
+  const colors = generateColors(catLabels.length);
+
+  // Bar Chart
+  if (catLabels.length > 0) {
+    new Chart(document.getElementById('barChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: catLabels,
+        datasets: [{ label: 'Amount (₹)', data: catValues, backgroundColor: colors, borderRadius: 8 }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // Line Chart
+  if (monthLabels.length > 0) {
+    new Chart(document.getElementById('lineChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Monthly Spend (₹)',
+          data: monthValues,
+          borderColor: '#6c63ff',
+          backgroundColor: 'rgba(108,99,255,0.15)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 5,
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // Pie Chart — labels on left
+  if (catLabels.length > 0) {
+    new Chart(document.getElementById('pieChart').getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: catLabels,
+        datasets: [{ data: catValues, backgroundColor: colors }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'left',
+            labels: { boxWidth: 14, padding: 12, font: { size: 12 } }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
