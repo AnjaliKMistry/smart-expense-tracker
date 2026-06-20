@@ -14,26 +14,27 @@ A Flask web application for tracking personal expenses with machine learning-pow
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Backend | Python, Flask |
-| Database | SQLite |
-| ML | XGBoost, scikit-learn, pandas, numpy |
-| Visualization | matplotlib, Chart.js |
-| Frontend | HTML/CSS templates, glassmorphism UI |
+| Layer         | Technology                           |
+| ------------- | ------------------------------------ |
+| Backend       | Python, Flask                        |
+| Database      | SQLite                               |
+| ML            | XGBoost, scikit-learn, pandas, numpy |
+| Visualization | matplotlib, Chart.js                 |
+| Frontend      | HTML/CSS templates, glassmorphism UI |
 
 ## Screenshots
 
-> Add screenshots to a `screenshots/` folder and link them here for your resume/GitHub.
+### Dashboard
 
-| Page | Placeholder |
-|------|-------------|
-| Dashboard | `screenshots/dashboard.png` |
-| Predict | `screenshots/predict.png` |
-| Forecast | `screenshots/forecast.png` |
-| Insights | `screenshots/insights.png` |
+![Dashboard](static/screenshots/dashboard.png)
 
-Run the app and capture screenshots from `http://localhost:5000` after setup.
+### Prediction
+
+![Predict](static/screenshots/predict.png)
+
+### Forecast
+
+![Forecast](static/screenshots/forecast.png)
 
 ## ML Approach
 
