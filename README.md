@@ -137,3 +137,10 @@ After running `init_db.py`, you can log in with:
 ## License
 
 MIT — free to use for learning and portfolio projects.
+
+## Author
+
+**Anjali Mistry**  
+B.E – Computer Engineering  
+LJ University  
+[AnjaliKMistry](https://github.com/AnjaliKMistry)
